@@ -32,6 +32,38 @@
             </tr>
             </tbody>
         </table>
+
+
+        <nav aria-label="Page navigation" class="d-flex justify-content-center pagination-nav">
+            <ul class="pagination">
+                <li class="page-item" th:classappend="${page <= 1} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/board/list(page=1, searchKeyword=${searchKeyword})}">&laquo;</a>
+                </li>
+                <li class="page-item" th:classappend="${startPage <= 1} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/board/list(page=${startPage-1}, searchKeyword=${searchKeyword})}">&lt;</a>
+                </li>
+
+                <th:block th:each="pageNumber : ${#numbers.sequence(startPage, endPage)}">
+                    <li class="page-item" th:classappend="${page} == ${pageNumber} ? 'active' : ''">
+                        <span th:if="${page} == ${pageNumber}" class="page-link" th:text="${pageNumber}"></span>
+                        <a th:unless="${page} == ${pageNumber}" class="page-link"
+                           th:href="@{/board/list(page=${pageNumber}, searchKeyword=${searchKeyword})}"
+                           th:text="${pageNumber}"></a>
+                    </li>
+                </th:block>
+
+                <li class="page-item" th:classappend="${endPage >= totalPages} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/board/list(page=${endPage+1}, searchKeyword=${searchKeyword})}">&gt;</a>
+                </li>
+                <li class="page-item" th:classappend="${page >= totalPages} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/board/list(page=${totalPages}, searchKeyword=${searchKeyword})}">&raquo;</a>
+                </li>
+            </ul>
+        </nav>
         <button type="button" class="btn btn-primary btn-block" id="write-btn">글쓰기</button>
     </div>
 </div>

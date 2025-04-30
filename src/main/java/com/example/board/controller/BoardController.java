@@ -103,12 +103,16 @@ public class BoardController {
     @GetMapping("/board/list")
     public String boardList(
             Model model,
-            @RequestParam(value = "page", defaultValue = "1") int page
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(defaultValue = "") String searchKeyword
     ) {
         int pageSize = 3; // 페이지 당 아이템 수
         Pageable pageable = PageRequest.of(page - 1, pageSize); // page는 1부터 시작, Pageable은 0부터 시작
 
-        Page<Board> boards = boardRepository.findAll(pageable);
+        Page<Board> boards = boardRepository.
+                findByTitleContainingOrContentContaining(
+                        searchKeyword, searchKeyword, pageable
+                );
         int totalPages = boards.getTotalPages(); // 전체 페이지 수
 
         // 페이지네이션 블록 계산 (예: 1-10, 11-20)
