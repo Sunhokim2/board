@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:cursor="http://www.w3.org/1999/xhtml">
 <head th:replace="~{common/head}">
-
+    <style>
+        .clickable-cell:hover {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
@@ -13,58 +17,90 @@
 
 </nav>
 
+
 <div class="container mt-5">
+    <h2 class="mb-4">게시판 목록</h2>
     <div class="row">
-        <table class="table table-hover">
-            <thead>
+        <table class="table table-hover text-center">
+            <thead class="table-light">
             <tr>
-                <th>번호</th>
-                <th>제목</th>
-                <th>작성자</th>
+                <th style="width: 10%;">번호</th>
+                <th style="width: 45%;">제목</th>
+                <th style="width: 15%;">작성자</th>
+                <th style="width: 10%;">조회수</th>
+                <th style="width: 10%;">좋아요</th>
             </tr>
             </thead>
             <tbody>
-            <tr th:each="board : ${list}" th:attr="id=${board.id}"
-                th:onclick="|location.href='/board/view?id=' + ${board.id}|">
-                <td th:text="${board.id}"></td>
-                <td th:text="${board.title}"></td>
-                <td th:text="${board.getUser().getName()}"></td>
+            <tr th:if="${#lists.isEmpty(list)}">
+                <td colspan="5">게시글이 없습니다.</td>
             </tr>
+            <tr th:each="board : ${list}" >
+                <td th:text="${board.id}"></td>
+
+                <td class="text-start clickable-cell" th:onclick="|location.href='/board/view?id=' + ${board.id}|">
+                    <span th:text="${board.title}" ></span>
+                    <span class="comment-count" th:if="${commentCounts[board.id] > 0}">
+                          [<span th:text="${commentCounts[board.id]}"></span>]
+                     </span>
+                </td>
+
+                <td th:text="${board.getUser()?.name ?: '알수없음'}"></td>
+                <td th:text="${board.viewCount}"></td>
+                <td th:text="${likeCounts[board.id]} ?: 0"></td> </tr>
             </tbody>
         </table>
 
 
-        <nav aria-label="Page navigation" class="d-flex justify-content-center pagination-nav">
+        <!--검색-->
+        <div class="row mb-3">
+            <div class="col-md-6 offset-md-3">
+                <form th:action="@{/board/list}" method="get" >
+                    <input type="text" name="searchKeyword" class="form-control me-2" placeholder="제목 또는 내용 검색" th:value="${searchKeyword}">
+                    <button type="submit" class="btn btn-outline-secondary">검색</button>
+                </form>
+            </div>
+        </div>
+<!--        페이징-->
+        <nav aria-label="Page navigation" class="d-flex justify-content-center mt-4" th:if="${totalPages > 0}">
             <ul class="pagination">
-                <li class="page-item" th:classappend="${page <= 1} ? 'disabled'">
-                    <a class="page-link"
-                       th:href="@{/board/list(page=1, searchKeyword=${searchKeyword})}">&laquo;</a>
+                <li class="page-item" th:classappend="${currentPage <= 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/board/list(page=1, searchKeyword=${searchKeyword})}" aria-label="First">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
                 </li>
+
                 <li class="page-item" th:classappend="${startPage <= 1} ? 'disabled'">
-                    <a class="page-link"
-                       th:href="@{/board/list(page=${startPage-1}, searchKeyword=${searchKeyword})}">&lt;</a>
+                    <a class="page-link" th:href="@{/board/list(page=${startPage -1}, searchKeyword=${searchKeyword})}" aria-label="Previous Block">
+                        <span aria-hidden="true">&lt;</span>
+                    </a>
                 </li>
 
                 <th:block th:each="pageNumber : ${#numbers.sequence(startPage, endPage)}">
-                    <li class="page-item" th:classappend="${page} == ${pageNumber} ? 'active' : ''">
-                        <span th:if="${page} == ${pageNumber}" class="page-link" th:text="${pageNumber}"></span>
-                        <a th:unless="${page} == ${pageNumber}" class="page-link"
+                    <li class="page-item" th:classappend="${currentPage == pageNumber} ? 'active' : ''">
+                        <a class="page-link"
                            th:href="@{/board/list(page=${pageNumber}, searchKeyword=${searchKeyword})}"
                            th:text="${pageNumber}"></a>
                     </li>
                 </th:block>
 
                 <li class="page-item" th:classappend="${endPage >= totalPages} ? 'disabled'">
-                    <a class="page-link"
-                       th:href="@{/board/list(page=${endPage+1}, searchKeyword=${searchKeyword})}">&gt;</a>
+                    <a class="page-link" th:href="@{/board/list(page=${endPage+1}, searchKeyword=${searchKeyword})}" aria-label="Next Block">
+                        <span aria-hidden="true">&gt;</span>
+                    </a>
                 </li>
-                <li class="page-item" th:classappend="${page >= totalPages} ? 'disabled'">
-                    <a class="page-link"
-                       th:href="@{/board/list(page=${totalPages}, searchKeyword=${searchKeyword})}">&raquo;</a>
+
+                <li class="page-item" th:classappend="${currentPage >= totalPages} ? 'disabled'">
+                    <a class="page-link" th:href="@{/board/list(page=${totalPages}, searchKeyword=${searchKeyword})}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
                 </li>
             </ul>
         </nav>
-        <button type="button" class="btn btn-primary btn-block" id="write-btn">글쓰기</button>
+
+        <div class="d-flex justify-content-end mt-3">
+            <a href="/board/write" class="btn btn-primary">글쓰기</a>
+        </div>
     </div>
 </div>
 <script>
