@@ -1,5 +1,7 @@
 package com.example.board.entity;
 
+import java.io.Serializable;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -8,7 +10,8 @@ import lombok.Data;
 
 @Entity
 @Data
-public class User {
+// Serializable은 개발할때 새로고침해도 유지하게함
+public class User implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

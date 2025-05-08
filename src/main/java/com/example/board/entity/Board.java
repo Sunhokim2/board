@@ -18,21 +18,14 @@ public class Board {
 	@Column(columnDefinition = "integer default 0")
 	private int viewCount = 0; // 조회수 필드 추가 및 초기화
 
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	@OneToMany(mappedBy = "board",
-			cascade = CascadeType.REMOVE,
-			orphanRemoval = true,
-			fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "board", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<Comment> comments = new ArrayList<>();
 
 	// Optional: Relationship back to likes made by this user
-	@OneToMany(mappedBy = "board",
-			cascade = CascadeType.REMOVE,
-			orphanRemoval = true,
-			fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "board", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<BoardLike> likes = new ArrayList<>();
 }
