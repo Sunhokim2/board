@@ -11,13 +11,14 @@ import com.example.board.repository.FileAtchRepository;
 import com.example.board.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
-import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import com.example.board.repository.BoardRepository;
@@ -217,12 +218,18 @@ public class BoardController {
 
     // 받아온건 title, content
     // userId는 따로 넣어줘야함
+    // Transactional로 인해 런타임 예외 발생시 DB는 rollback(스토리지에 저장한건 적용안됨)
+    @Transactional(
+            rollbackFor = {
+                    IOException.class,
+                    RuntimeException.class
+            })
     @PostMapping("/board/write")
     public String boardWritePost(
             @ModelAttribute Board board,
             @RequestParam MultipartFile file,
             HttpSession session,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes) throws IOException  {
         User user = (User) session.getAttribute("user_info");
         User author;
 
